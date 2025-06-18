@@ -8,19 +8,19 @@ const StatsCard = ({ title, value }) => {
     <Card
       elevation={4}
       sx={{
-        minWidth: 200,
+        minWidth: 100,
         backgroundColor: 'background.paper',
         borderRadius: 3,
         color: 'text.primary',
         borderLeft: '6px solid #80CBC4', // you can change to theme.secondary.main for variety
-        p: 1.5,
+        p: 0.5,
       }}
     >
       <CardContent>
         <Typography
           variant="subtitle2"
           color="text.secondary"
-          sx={{ fontSize: '0.85rem', mb: 1 }}
+          sx={{ fontSize: '0.85rem' }}
         >
           {title}
         </Typography>

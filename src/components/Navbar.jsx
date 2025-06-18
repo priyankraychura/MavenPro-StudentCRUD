@@ -4,12 +4,17 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
+    const location = useLocation();
+    const isEditing = location?.pathname?.startsWith('/add-student-data/') && location?.pathname?.split('/')?.length === 3;
+
+    console.log(isEditing);
+    
     const navLinks = [
         { label: "Home", to: "/" },
-        { label: "Add Student", to: "/add-student-data" },
+        { label: isEditing ? "Update Student" : "Add Student", to: "/add-student-data" },
     ];
 
     return (

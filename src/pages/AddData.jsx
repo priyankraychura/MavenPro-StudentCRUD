@@ -11,6 +11,8 @@ import {
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import localstorageService from '../servies/localstorageService';
 import showToast from '../servies/toastService';
+import Skeleton from '@mui/material/Skeleton';
+
 
 const AddData = () => {
     const [userData, setUserData] = useState(localstorageService?.getItem('studentsData') || []);
@@ -33,6 +35,16 @@ const AddData = () => {
         rollno: true
     })
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setLoading(false);
+        }, 800); // simulate a short load time (e.g., 800ms)
+
+        return () => clearTimeout(timeout);
+    }, []);
 
     // checks whether id is received in params when loaded
     useEffect(() => {
@@ -156,6 +168,7 @@ const AddData = () => {
                 p: 2,
             }}
         >
+
             <Card
                 sx={{
                     width: '100%',
@@ -167,68 +180,78 @@ const AddData = () => {
             >
                 <CardContent sx={{ p: 4 }}>
                     <Typography variant="h5" sx={{ color: '#fff', mb: 1 }}>
-                        {editIndex ? 'Update Student' : 'Add New Student'}
+                        {
+                            loading ? <Skeleton height={40} /> :
+                                editIndex ? 'Update Student' : 'Add New Student'
+                        }
                     </Typography>
                     <Divider sx={{ background: '#334155', mb: 3 }} />
 
                     <Box component="form" autoComplete="off" onSubmit={handleSubmit}>
                         {fields?.map((field) => (
-                            <TextField
-                                key={field?.name}
-                                name={field?.name}
-                                label={field?.label}
-                                type={field?.type || "text"}
-                                disabled={field?.disabled || false}
-                                autoFocus={field?.autoFocus || false}
-                                error={!isValid?.[field?.name]}
-                                value={formData?.[field?.name]}
-                                onChange={handleOnChange}
-                                onBlur={handleOnBlur}
-                                onFocus={handleFocus}
-                                fullWidth
-                                margin="normal"
-                                variant="outlined"
-                                helperText={!isValid?.[field?.name] ? "Invalid input" : ""}
-                                InputProps={{ style: { color: "#fff" } }}
-                                InputLabelProps={{
-                                    style: {
-                                        color: !isValid?.[field?.name] ? "#E23F44" : "#cbd5e1",
-                                    },
-                                }}
-                                sx={{
-                                    "& fieldset": { borderColor: "#334155" },
-                                    "&:hover fieldset": { borderColor: "#64748b" },
-                                }}
-                            />
+                            loading ? <Skeleton variant="rounded" height={60} sx={{ mb: 3 }} />
+                                : <TextField
+                                    key={field?.name}
+                                    name={field?.name}
+                                    label={field?.label}
+                                    type={field?.type || "text"}
+                                    disabled={field?.disabled || false}
+                                    autoFocus={field?.autoFocus || false}
+                                    error={!isValid?.[field?.name]}
+                                    value={formData?.[field?.name]}
+                                    onChange={handleOnChange}
+                                    onBlur={handleOnBlur}
+                                    onFocus={handleFocus}
+                                    fullWidth
+                                    margin="normal"
+                                    variant="outlined"
+                                    helperText={!isValid?.[field?.name] ? "Invalid input" : ""}
+                                    InputProps={{ style: { color: "#fff" } }}
+                                    InputLabelProps={{
+                                        style: {
+                                            color: !isValid?.[field?.name] ? "#E23F44" : "#cbd5e1",
+                                        },
+                                    }}
+                                    sx={{
+                                        "& fieldset": { borderColor: "#334155" },
+                                        "&:hover fieldset": { borderColor: "#64748b" },
+                                    }}
+                                />
                         ))}
 
 
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
                             <Link to="/">
-                                <Button variant="outlined" sx={{
-                                    borderColor: '#64748b',
-                                    color: '#cbd5e1',
-                                    '&:hover': {
-                                        borderColor: '#94a3b8',
-                                        backgroundColor: '#1e293b',
-                                    },
-                                }}>
-                                    Cancel
-                                </Button>
+                                {
+                                    loading ? <Skeleton variant="rounded" width={80} height={40} />
+                                        : <Button variant="outlined" sx={{
+                                            borderColor: '#64748b',
+                                            color: '#cbd5e1',
+                                            '&:hover': {
+                                                borderColor: '#94a3b8',
+                                                backgroundColor: '#1e293b',
+                                            },
+                                        }}>
+                                            Cancel
+                                        </Button>
+                                }
                             </Link>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                sx={{
-                                    backgroundColor: '#38bdf8',
-                                    color: '#000',
-                                    '&:hover': {
-                                        backgroundColor: '#0ea5e9',
-                                    },
-                                }}
-                            >
-                                Submit
-                            </Button>
+                            {
+                                loading ? <Skeleton variant="rounded" width={80} height={40} />
+                                    : <Button
+                                        type="submit"
+                                        variant="contained"
+                                        sx={{
+                                            backgroundColor: '#38bdf8',
+                                            color: '#000',
+                                            '&:hover': {
+                                                backgroundColor: '#0ea5e9',
+                                            },
+                                        }}
+                                    >
+                                        Submit
+                                    </Button>
+                            }
                         </Box>
                     </Box>
                 </CardContent>

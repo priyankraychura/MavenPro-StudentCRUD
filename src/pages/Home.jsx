@@ -18,6 +18,8 @@ import { Link } from 'react-router-dom';
 import ConfirmDialog from '../components/ConfirmDialog';
 import showToast from '../servies/toastService';
 import Button from '@mui/material/Button';
+import ClassCard from '../components/ClassCard';
+import Skeleton from '@mui/material/Skeleton';
 
 const Home = () => {
   document.title = "Dashboard";
@@ -27,6 +29,23 @@ const Home = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 800); // simulate a short load time (e.g., 800ms)
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const classCounts = userData.reduce((acc, curr) => {
+    const cls = curr?.class;
+    if (cls) {
+      acc[cls] = (acc[cls] || 0) + 1;
+    }
+    return acc;
+  }, {});
 
   const updateUserData = (newData, message) => {
     setUserData(newData);
@@ -121,78 +140,102 @@ const Home = () => {
 
   return (
     <Box sx={{ px: 5, py: 5, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-        <StatsCard title="Total Students" value={userData?.length} />
-        <StatsCard title="Number of Classes" value={new Set(userData?.map(s => s?.class))?.size} />
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3, maxWidth: '80%', justifyContent: 'center' }}>
+        {
+          loading ? <Skeleton variant="rounded" width={130} height={100} sx={{ borderRadius: '30px' }} />
+            : <StatsCard title="Total Students" value={userData?.length} />
+        }
+        {
+          loading ? <Skeleton variant="rounded" width={130} height={100} sx={{ borderRadius: '30px' }} />
+            : <StatsCard title="Total Classes" value={new Set(userData?.map(s => s?.class))?.size} />
+        }
+        {Object.entries(classCounts)?.map(([cls, count]) => (
+          loading ? <Skeleton variant="rounded" width={100} height={100} sx={{ borderRadius: '30px' }} />
+            : <StatsCard title={cls} value={count} />
+        ))}
       </Box>
-      <Box sx={{ display: 'flex', width: '60%', justifyContent: 'space-between', gap: 2, mb: 2 }}>
+
+      <Box sx={{ display: 'flex', width: '65%', justifyContent: 'space-between', gap: 2, mb: 2 }}>
         <Box sx={{
           display: 'flex',
           gap: 2
         }}>
-          <TextField
-            label="Search"
-            variant="outlined"
-            fullWidth
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ width: '300px' }}
-          />
-          <Button
-            variant="contained"
-            onClick={() => {
-              setSearchQuery('');
-              setClassFilter('');
-            }}
-          >
-            Clear
-          </Button>
+          {
+            loading ? <Skeleton variant="rounded" width={300} height={55} />
+              : <TextField
+                label="Search"
+                variant="outlined"
+                fullWidth
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ width: '300px' }}
+              />
+          }
+          {(searchQuery || classFilter) && (
+            <Button
+              variant="contained"
+              onClick={() => {
+                setSearchQuery('');
+                setClassFilter('');
+                showToast('success', 'All filters cleared!');
+              }}
+            >
+              Clear
+            </Button>
+          )}
         </Box>
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Filter by Class</InputLabel>
-          <Select
-            value={classFilter}
-            label="Filter by Class"
-            onChange={(e) => setClassFilter(e.target.value)}
-          >
-            <MenuItem value="">All Classes</MenuItem>
-            {classOptions?.map((cls, index) => (
-              <MenuItem key={index} value={cls}>{cls}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {
+          loading ? <Skeleton variant="rounded" width={200} height={55} />
+            : <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Filter by Class</InputLabel>
+              <Select
+                value={classFilter}
+                label="Filter by Class"
+                onChange={(e) => setClassFilter(e.target.value)}
+              >
+                <MenuItem value="">All Classes</MenuItem>
+                {classOptions?.map((cls, index) => (
+                  <MenuItem key={index} value={cls}>{cls}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+        }
       </Box>
 
-      <Paper sx={{ height: 400, width: '60%' }}>
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          pageSizeOptions={[5, 10]}
-          initialState={{
-            pagination: { paginationModel: { page: 0, pageSize: 5 } },
-          }}
-          localeText={{
-            noRowsLabel: 'No data available',
-          }}
-          sx={{ border: 1, borderColor: 'gray' }}
-        />
-        <ConfirmDialog
-          open={confirmOpen}
-          title="Delete Confirmation"
-          message={
-            selectedStudent
-              ? `Are you sure you want to delete "${selectedStudent?.name}" (Roll No: ${selectedStudent?.rollno})?`
-              : 'Are you sure you want to delete this student entry?'
-          }
-          onCancel={() => setConfirmOpen(false)}
-          onConfirm={() => {
-            handleDelete(selectedStudent?.id);
-            setConfirmOpen(false);
-          }}
-        />
+      {loading ? (
+        <Skeleton variant="rounded" width="65%" height={400} />
+      ) : (
+        <Paper sx={{ height: 400, width: '65%' }}>
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            initialState={{
+              pagination: { paginationModel: { page: 0, pageSize: 5 } },
+            }}
+            localeText={{
+              noRowsLabel: 'No data available',
+            }}
+            sx={{ border: 1, borderColor: 'gray' }}
+          />
+          <ConfirmDialog
+            open={confirmOpen}
+            title="Delete Confirmation"
+            message={
+              selectedStudent
+                ? `Are you sure you want to delete "${selectedStudent?.name}" (Roll No: ${selectedStudent?.rollno})?`
+                : 'Are you sure you want to delete this student entry?'
+            }
+            onCancel={() => setConfirmOpen(false)}
+            onConfirm={() => {
+              handleDelete(selectedStudent?.id);
+              setConfirmOpen(false);
+            }}
+          />
 
 
-      </Paper>
+        </Paper>
+      )}
     </Box>
   );
 }
