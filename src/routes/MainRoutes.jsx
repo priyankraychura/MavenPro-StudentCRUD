@@ -8,8 +8,7 @@ const MainRoutes = () => {
     <div>
       <Routes>
         <Route path='/' Component={Home}></Route>
-        {/* <Route path='/addData' Component={AddData}></Route> */}
-        <Route path='/addData/:id?' Component={AddData}></Route>
+        <Route path='/add-student-data/:id?' Component={AddData}></Route>
       </Routes>
     </div>
   )

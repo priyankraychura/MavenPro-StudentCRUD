@@ -35,7 +35,7 @@ const darkTheme = createTheme({
   },
 });
 
-function App() {
+const App = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />

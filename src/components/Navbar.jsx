@@ -9,7 +9,7 @@ import { Link, NavLink } from 'react-router-dom';
 const Navbar = () => {
     const navLinks = [
         { label: "Home", to: "/" },
-        { label: "Add Student", to: "/addData" },
+        { label: "Add Student", to: "/add-student-data" },
     ];
 
     return (

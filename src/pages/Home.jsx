@@ -17,19 +17,16 @@ import StatsCard from '../components/StatsCard';
 import { Link } from 'react-router-dom';
 import ConfirmDialog from '../components/ConfirmDialog';
 import showToast from '../servies/toastService';
+import Button from '@mui/material/Button';
 
 const Home = () => {
+  document.title = "Dashboard";
   const [userData, setUserData] = useState(localstorageService?.getItem('studentsData') || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
-
-
-  useEffect(() => {
-    document.title = "Dashboard";
-  }, []);
 
   const updateUserData = (newData, message) => {
     setUserData(newData);
@@ -84,7 +81,7 @@ const Home = () => {
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          <Link to={`/addData/${params?.row?.id}`}>
+          <Link to={`/add-student-data/${params?.row?.id}`}>
             <IconButton color="primary" size="small">
               <EditIcon fontSize="small" />
             </IconButton>
@@ -129,14 +126,28 @@ const Home = () => {
         <StatsCard title="Number of Classes" value={new Set(userData?.map(s => s?.class))?.size} />
       </Box>
       <Box sx={{ display: 'flex', width: '60%', justifyContent: 'space-between', gap: 2, mb: 2 }}>
-        <TextField
-          label="Search"
-          variant="outlined"
-          fullWidth
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ width: '300px' }}
-        />
+        <Box sx={{
+          display: 'flex',
+          gap: 2
+        }}>
+          <TextField
+            label="Search"
+            variant="outlined"
+            fullWidth
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ width: '300px' }}
+          />
+          <Button
+            variant="contained"
+            onClick={() => {
+              setSearchQuery('');
+              setClassFilter('');
+            }}
+          >
+            Clear
+          </Button>
+        </Box>
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Filter by Class</InputLabel>
           <Select

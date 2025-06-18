@@ -15,7 +15,7 @@ import showToast from '../servies/toastService';
 const AddData = () => {
     const [userData, setUserData] = useState(localstorageService?.getItem('studentsData') || []);
     const { id } = useParams();
-    const [editIndex, setEditIndex] = useState(id || null);
+    const editIndex = id ? Number(id) : null;// change from useState to just a number
     const [formData, setFormData] = useState({
         id: Date.now(),
         name: '',
@@ -23,6 +23,7 @@ const AddData = () => {
         grno: '',
         rollno: ''
     });
+    document.title = editIndex ? "Update Student" : "Add Student";
 
     // sets all input field to true
     const [isValid, setIsValid] = useState({
@@ -35,13 +36,13 @@ const AddData = () => {
 
     // checks whether id is received in params when loaded
     useEffect(() => {
-        document.title = "Add/Update Student";
         if (editIndex) {
-            const student = userData?.find((item) => item?.id == editIndex);
+            const student = userData?.find((item) => item?.id === editIndex);
             if (student) {
                 setFormData(student);
             } else {
-                navigate('/');
+                showToast('error', "Invalid student id!");
+                setTimeout(() => navigate('/'), 1500);
             }
         } else {
             // Auto-generate roll number if adding new
