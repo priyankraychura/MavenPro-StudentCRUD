@@ -1,4 +1,4 @@
-let localstorageService = {
+const localstorageService = {
     setItem: (key, value) => {
         const newValue = JSON.stringify(value)
         localStorage.setItem(key, newValue)

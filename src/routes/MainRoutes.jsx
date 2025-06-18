@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import Home from '../pages/Home'
 import AddData from '../pages/AddData'
 
-function MainRoutes() {
+const MainRoutes = () => {
   return (
     <div>
       <Routes>

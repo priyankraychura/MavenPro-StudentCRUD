@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
 
-function StatsCard({ title, value }) {
+const StatsCard = ({ title, value }) => {
   return (
     <Card
       elevation={4}

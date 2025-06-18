@@ -18,8 +18,8 @@ import { Link } from 'react-router-dom';
 import ConfirmDialog from '../components/ConfirmDialog';
 import showToast from '../servies/toastService';
 
-function Home() {
-  const [userData, setUserData] = useState(localstorageService.getItem('studentsData') || []);
+const Home = () => {
+  const [userData, setUserData] = useState(localstorageService?.getItem('studentsData') || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -33,7 +33,7 @@ function Home() {
 
   const updateUserData = (newData, message) => {
     setUserData(newData);
-    localstorageService.setItem('studentsData', newData);
+    localstorageService?.setItem('studentsData', newData);
     showToast('success', message);
   };
 
@@ -69,7 +69,7 @@ function Home() {
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        return filteredRows.findIndex(row => row?.id === params?.id) + 1;
+        return filteredRows?.findIndex(row => row?.id === params?.id) + 1;
       }
     },
     { field: 'id', headerName: 'Unique ID', width: 150 },
@@ -112,7 +112,7 @@ function Home() {
   ];
 
   // Get unique class options for dropdown
-  const classOptions = [...new Set(userData.map(item => item?.class).filter(Boolean))];
+  const classOptions = [...new Set(userData?.map(item => item?.class).filter(Boolean))];
 
   // Filter logic
   const filteredRows = userData?.filter((row) => {
