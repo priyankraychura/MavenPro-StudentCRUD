@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
@@ -15,39 +15,67 @@ import MenuItem from '@mui/material/MenuItem';
 import localstorageService from '../servies/localstorageService';
 import StatsCard from '../components/StatsCard';
 import { Link } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
 import ConfirmDialog from '../components/ConfirmDialog';
+import showToast from '../servies/toastService';
 
-export default function Home() {
+function Home() {
   const [userData, setUserData] = useState(localstorageService.getItem('studentsData') || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
+
+  useEffect(() => {
+    document.title = "Dashboard";
+  }, []);
+
+  const updateUserData = (newData, message) => {
+    setUserData(newData);
+    localstorageService.setItem('studentsData', newData);
+    showToast('success', message);
+  };
 
   // filters by id and update it with localstorage
   const handleDelete = (id) => {
-    const updatedData = userData.filter((row) => row.id !== id);
-    setUserData(updatedData);
-    localstorageService.setItem('studentsData', updatedData);
-    toast.success("Data deleted successfully!")
+    const updatedData = userData?.filter((row) => row?.id !== id);
+    updateUserData(updatedData, "Data deleted successfully!");
   };
 
   // when copy button is clicked row data is duplicated creating new id
   const handleCopy = (row) => {
-    const newEntry = { ...row, id: Date.now() };
+    // Find the highest rollno in userData
+    const maxRollNo = Math.max(...userData.map((item) => Number(item?.rollno) || 0));
+
+    // Create a copy with a new ID and incremented roll number
+    const newEntry = {
+      ...row,
+      id: Date.now(),
+      rollno: String(maxRollNo + 1)
+    };
+
     const updatedData = [...userData, newEntry];
-    setUserData(updatedData);
-    localstorageService.setItem('studentsData', updatedData);
-    toast.success("Data duplicated successfully!")
+    updateUserData(updatedData, "Data duplicated successfully!");
   };
 
+
+
   const columns = [
-    { field: 'id', headerName: 'ID', width: 140 },
-    { field: 'name', headerName: 'Name', width: 130 },
-    { field: 'class', headerName: 'Class', width: 130 },
+    {
+      field: 'srno',
+      headerName: 'Sr. no',
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        return filteredRows.findIndex(row => row?.id === params?.id) + 1;
+      }
+    },
+    { field: 'id', headerName: 'Unique ID', width: 150 },
     { field: 'rollno', headerName: 'Roll No.', width: 130 },
+    { field: 'name', headerName: 'Name', width: 150 },
+    { field: 'class', headerName: 'Class', width: 130 },
     { field: 'grno', headerName: 'GR No.', width: 130 },
     {
       field: 'action',
@@ -56,7 +84,7 @@ export default function Home() {
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          <Link to={`/addData/${params.row.id}`}>
+          <Link to={`/addData/${params?.row?.id}`}>
             <IconButton color="primary" size="small">
               <EditIcon fontSize="small" />
             </IconButton>
@@ -66,16 +94,15 @@ export default function Home() {
               color="error"
               size="small"
               onClick={() => {
-                setSelectedId(params.row.id);
+                setSelectedStudent(params?.row); // save full row (student) object
                 setConfirmOpen(true);
               }}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
-
           </Link>
           <Link>
-            <IconButton color="success" size="small" onClick={() => handleCopy(params.row)}>
+            <IconButton color="success" size="small" onClick={() => handleCopy(params?.row)}>
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Link>
@@ -85,32 +112,32 @@ export default function Home() {
   ];
 
   // Get unique class options for dropdown
-  const classOptions = [...new Set(userData.map(item => item.class).filter(Boolean))];
+  const classOptions = [...new Set(userData.map(item => item?.class).filter(Boolean))];
 
   // Filter logic
-  const filteredRows = userData.filter((row) => {
+  const filteredRows = userData?.filter((row) => {
     const matchesSearch = Object.values(row)
-      .some(val => String(val).toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesClass = classFilter ? row.class === classFilter : true;
+      .some(val => String(val).toLowerCase().includes(searchQuery?.toLowerCase()));
+    const matchesClass = classFilter ? row?.class === classFilter : true;
     return matchesSearch && matchesClass;
   });
 
   return (
-    <Box sx={{ px: 5, py: 5 }}>
-      <Toaster />
+    <Box sx={{ px: 5, py: 5, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-        <StatsCard title="Total Students" value={userData.length} />
-        <StatsCard title="Number of Classes" value={new Set(userData.map(s => s.class)).size} />
+        <StatsCard title="Total Students" value={userData?.length} />
+        <StatsCard title="Number of Classes" value={new Set(userData?.map(s => s?.class))?.size} />
       </Box>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', width: '60%', justifyContent: 'space-between', gap: 2, mb: 2 }}>
         <TextField
           label="Search"
           variant="outlined"
           fullWidth
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ width: '300px' }}
         />
-        <FormControl sx={{ minWidth: 160 }}>
+        <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Filter by Class</InputLabel>
           <Select
             value={classFilter}
@@ -118,14 +145,14 @@ export default function Home() {
             onChange={(e) => setClassFilter(e.target.value)}
           >
             <MenuItem value="">All Classes</MenuItem>
-            {classOptions.map((cls, index) => (
+            {classOptions?.map((cls, index) => (
               <MenuItem key={index} value={cls}>{cls}</MenuItem>
             ))}
           </Select>
         </FormControl>
       </Box>
 
-      <Paper sx={{ height: 450, width: '100%' }}>
+      <Paper sx={{ height: 400, width: '60%' }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
@@ -133,20 +160,30 @@ export default function Home() {
           initialState={{
             pagination: { paginationModel: { page: 0, pageSize: 5 } },
           }}
-          sx={{ border: 0 }}
+          localeText={{
+            noRowsLabel: 'No data available',
+          }}
+          sx={{ border: 1, borderColor: 'gray' }}
         />
         <ConfirmDialog
           open={confirmOpen}
           title="Delete Confirmation"
-          message="Are you sure you want to delete this student entry?"
+          message={
+            selectedStudent
+              ? `Are you sure you want to delete "${selectedStudent?.name}" (Roll No: ${selectedStudent?.rollno})?`
+              : 'Are you sure you want to delete this student entry?'
+          }
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => {
-            handleDelete(selectedId);
+            handleDelete(selectedStudent?.id);
             setConfirmOpen(false);
           }}
         />
+
 
       </Paper>
     </Box>
   );
 }
+
+export default Home

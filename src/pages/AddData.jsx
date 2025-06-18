@@ -10,10 +10,9 @@ import {
 } from '@mui/material';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import localstorageService from '../servies/localstorageService';
+import showToast from '../servies/toastService';
 
-import toast, { Toaster } from 'react-hot-toast';
-
-export default function AddData() {
+function AddData() {
     const [userData, setUserData] = useState(localstorageService.getItem('studentsData') || []);
     const { id } = useParams();
     const [editIndex, setEditIndex] = useState(id || null);
@@ -36,9 +35,25 @@ export default function AddData() {
 
     // checks whether id is received in params when loaded
     useEffect(() => {
+        document.title = "Add/Update Student";
         if (editIndex) {
-            const student = userData.find((item) => item.id == editIndex);
-            if (student) setFormData(student);
+            const student = userData?.find((item) => item?.id == editIndex);
+            if (student) {
+                setFormData(student);
+            } else {
+                navigate('/');
+            }
+        } else {
+            // Auto-generate roll number if adding new
+            const maxRollNo = userData?.reduce((max, curr) => {
+                const roll = parseInt(curr?.rollno);
+                return roll > max ? roll : max;
+            }, 0);
+
+            setFormData((prev) => ({
+                ...prev,
+                rollno: String(maxRollNo + 1),
+            }));
         }
     }, []);
 
@@ -64,9 +79,18 @@ export default function AddData() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Validate all fields manually on submit
+        const updatedValidity = {
+            name: formData.name.trim().length >= 3,
+            class: formData.class.trim().length >= 3,
+            grno: formData.grno.trim().length >= 3,
+            rollno: formData.rollno.trim().length > 0
+        };
+
+        setIsValid(updatedValidity);
+
         let isFormInvalid = Object.values(isValid).some(value => value == false);
         if (isFormInvalid) {
-            toast.error("Invalid input!")
             return;
         }
 
@@ -75,12 +99,12 @@ export default function AddData() {
         // if id is received then update else add new data
         if (editIndex) {
             updatedData = userData.map((item) =>
-                item.id == editIndex ? { ...formData, id: Number(editIndex) } : item
+                item?.id == editIndex ? { ...formData, id: Number(editIndex) } : item
             );
-            toast.success("Updated successfully!")
+            showToast('success', 'Updated successfully!');
         } else {
             updatedData = [...userData, { ...formData, id: Date.now() }];
-            toast.success("Added successfully!")
+            showToast('success', 'Added successfully!');
         }
 
         setUserData(updatedData);
@@ -110,7 +134,7 @@ export default function AddData() {
 
         <Box
             sx={{
-                minHeight: '100vh',
+                minHeight: '91vh',
                 backgroundColor: '#101624',
                 display: 'flex',
                 justifyContent: 'center',
@@ -118,7 +142,6 @@ export default function AddData() {
                 p: 2,
             }}
         >
-            <Toaster />
             <Card
                 sx={{
                     width: '100%',
@@ -136,68 +159,12 @@ export default function AddData() {
 
                     <Box component="form" autoComplete="off" onSubmit={handleSubmit}>
                         <TextField
-                            autoFocus
-                            error={!isValid.name}
-                            name="name"
-                            label="Student Name"
-                            value={formData.name}
-                            onChange={handleOnChange}
-                            onBlur={handleOnBlur}
-                            onFocus={handleFocus}
-                            fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputProps={{ style: { color: '#fff' } }}
-                            InputLabelProps={{ style: { color: !isValid.name ? "#E23F44" : '#cbd5e1' } }}
-                            sx={{
-                                '& fieldset': { borderColor: '#334155' },
-                                '&:hover fieldset': { borderColor: '#64748b' },
-                            }}
-                            helperText={!isValid.name ? "Invalid input" : ""}
-                        />
-                        <TextField
-                            error={!isValid.class}
-                            name="class"
-                            label="Class"
-                            value={formData.class}
-                            onChange={handleOnChange}
-                            onBlur={handleOnBlur}
-                            onFocus={handleFocus}
-                            fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputProps={{ style: { color: '#fff' } }}
-                            InputLabelProps={{ style: { color: !isValid.class ? "#E23F44" : '#cbd5e1' } }}
-                            sx={{
-                                '& fieldset': { borderColor: '#334155' },
-                                '&:hover fieldset': { borderColor: '#64748b' },
-                            }}
-                            helperText={!isValid.class ? "Invalid input" : ""}
-                        />
-                        <TextField
-                            error={!isValid.grno}
-                            name="grno"
-                            label="GR Number"
-                            value={formData.grno}
-                            onChange={handleOnChange}
-                            onBlur={handleOnBlur}
-                            onFocus={handleFocus}
-                            fullWidth
-                            margin="normal"
-                            variant="outlined"
-                            InputProps={{ style: { color: '#fff' } }}
-                            InputLabelProps={{ style: { color: !isValid.grno ? "#E23F44" : '#cbd5e1' } }}
-                            sx={{
-                                '& fieldset': { borderColor: '#334155' },
-                                '&:hover fieldset': { borderColor: '#64748b' },
-                            }}
-                            helperText={!isValid.grno ? "Invalid input" : ""}
-                        />
-                        <TextField
-                            error={!isValid.rollno}
+                            disabled
+                            error={!isValid?.rollno}
                             name="rollno"
                             label="Roll Number"
-                            value={formData.rollno}
+                            type='number'
+                            value={formData?.rollno}
                             onChange={handleOnChange}
                             onBlur={handleOnBlur}
                             onFocus={handleFocus}
@@ -205,12 +172,71 @@ export default function AddData() {
                             margin="normal"
                             variant="outlined"
                             InputProps={{ style: { color: '#fff' } }}
-                            InputLabelProps={{ style: { color: !isValid.rollno ? "#E23F44" : '#cbd5e1' } }}
+                            InputLabelProps={{ style: { color: !isValid?.rollno ? "#E23F44" : '#cbd5e1' } }}
                             sx={{
                                 '& fieldset': { borderColor: '#334155' },
                                 '&:hover fieldset': { borderColor: '#64748b' },
                             }}
-                            helperText={!isValid.rollno ? "Invalid input" : ""}
+                            helperText={!isValid?.rollno ? "Invalid input" : ""}
+                        />
+                        <TextField
+                            autoFocus
+                            error={!isValid?.name}
+                            name="name"
+                            label="Student Name"
+                            value={formData?.name}
+                            onChange={handleOnChange}
+                            onBlur={handleOnBlur}
+                            onFocus={handleFocus}
+                            fullWidth
+                            margin="normal"
+                            variant="outlined"
+                            InputProps={{ style: { color: '#fff' } }}
+                            InputLabelProps={{ style: { color: !isValid?.name ? "#E23F44" : '#cbd5e1' } }}
+                            sx={{
+                                '& fieldset': { borderColor: '#334155' },
+                                '&:hover fieldset': { borderColor: '#64748b' },
+                            }}
+                            helperText={!isValid?.name ? "Invalid input" : ""}
+                        />
+                        <TextField
+                            error={!isValid?.class}
+                            name="class"
+                            label="Class"
+                            value={formData?.class}
+                            onChange={handleOnChange}
+                            onBlur={handleOnBlur}
+                            onFocus={handleFocus}
+                            fullWidth
+                            margin="normal"
+                            variant="outlined"
+                            InputProps={{ style: { color: '#fff' } }}
+                            InputLabelProps={{ style: { color: !isValid?.class ? "#E23F44" : '#cbd5e1' } }}
+                            sx={{
+                                '& fieldset': { borderColor: '#334155' },
+                                '&:hover fieldset': { borderColor: '#64748b' },
+                            }}
+                            helperText={!isValid?.class ? "Invalid input" : ""}
+                        />
+                        <TextField
+                            error={!isValid?.grno}
+                            name="grno"
+                            label="GR Number"
+                            type='number'
+                            value={formData?.grno}
+                            onChange={handleOnChange}
+                            onBlur={handleOnBlur}
+                            onFocus={handleFocus}
+                            fullWidth
+                            margin="normal"
+                            variant="outlined"
+                            InputProps={{ style: { color: '#fff' } }}
+                            InputLabelProps={{ style: { color: !isValid?.grno ? "#E23F44" : '#cbd5e1' } }}
+                            sx={{
+                                '& fieldset': { borderColor: '#334155' },
+                                '&:hover fieldset': { borderColor: '#64748b' },
+                            }}
+                            helperText={!isValid?.grno ? "Invalid input" : ""}
                         />
 
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
@@ -246,3 +272,5 @@ export default function AddData() {
         </Box>
     );
 }
+
+export default AddData

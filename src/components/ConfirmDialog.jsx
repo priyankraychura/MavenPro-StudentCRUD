@@ -4,7 +4,7 @@ import {
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button
 } from '@mui/material';
 
-export default function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
+function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
   return (
     <Dialog
       open={open}
@@ -25,3 +25,5 @@ export default function ConfirmDialog({ open, title, message, onConfirm, onCance
     </Dialog>
   );
 }
+
+export default ConfirmDialog

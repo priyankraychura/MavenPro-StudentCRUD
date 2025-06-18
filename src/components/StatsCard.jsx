@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
 
-export default function StatsCard({ title, value }) {
+function StatsCard({ title, value }) {
   return (
     <Card
       elevation={4}
@@ -31,3 +31,5 @@ export default function StatsCard({ title, value }) {
     </Card>
   );
 }
+
+export default StatsCard

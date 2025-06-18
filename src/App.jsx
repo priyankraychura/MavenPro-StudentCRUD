@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
+import { Toaster } from 'react-hot-toast'
 
 const darkTheme = createTheme({
   palette: {
@@ -35,12 +36,11 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <BrowserRouter>
+        <Toaster />
         <Navbar />
         <MainRoutes />
       </BrowserRouter>

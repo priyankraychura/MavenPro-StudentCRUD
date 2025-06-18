@@ -4,9 +4,9 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
-export default function Navbar() {
+function Navbar() {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
@@ -14,10 +14,24 @@ export default function Navbar() {
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         STUDENT CRUD OPERATION
                     </Typography>
-                    <Link to={'/'}><Button sx={{ color: '#FFF' }} color="inherit">Home</Button></Link>
-                    <Link to={'/addData'}><Button sx={{ color: '#FFF' }} color="inherit">Add Student</Button></Link>
+                    <NavLink to={'/'}>
+                        {
+                            ({ isActive }) => (
+                                <Button sx={{ color: "#FFF", backgroundColor: isActive ? '#121C2B' : 'transparent' }} color="inherit">Home</Button>
+                            )
+                        }
+                    </NavLink>
+                    <NavLink to={'/addData'}>
+                        {
+                            ({ isActive }) => (
+                                <Button sx={{ color: "#FFF", backgroundColor: isActive ? '#121C2B' : 'transparent' }} color="inherit">Add Student</Button>
+                            )
+                        }
+                    </NavLink>
                 </Toolbar>
             </AppBar>
         </Box>
     )
 }
+
+export default Navbar
